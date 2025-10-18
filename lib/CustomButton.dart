@@ -84,11 +84,9 @@ class _CustomButtonWidgetState extends State<_CustomButtonWidget> {
   // Reproduce el sonido (no bloqueante). Creamos un AudioPlayer en modo lowLatency.
   Future<void> _playClickSound(String assetPath) async {
     try {
-      final player = AudioPlayer(playerMode: PlayerMode.lowLatency);
+      final player = AudioPlayer();
+      await player.setReleaseMode(ReleaseMode.stop);
       await player.play(AssetSource(assetPath));
-      // No esperamos la terminación completa para no bloquear; liberamos recursos.
-      // En la práctica se podría mantener un pool si hay muchos sonidos simultáneos,
-      // pero para la mayoría de los casos crear+dispose funciona bien.
       player.dispose();
     } catch (e) {
       // Si falla la reproducción no hacemos nada (no rompe la UI).
