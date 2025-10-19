@@ -2,9 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 
-/// Un botón completamente personalizable, con una API sencilla estilo OOP.
-/// Ahora con soporte para reproducir un sonido al hacer click:
-///   button.setAudioOnClick("assets/audio/click8.wav");
+/// Un botón completamente personalizable, con API simple.
+/// Permite sonido, color, texto, ancho fijo, etc.
 class Button {
   String _text = "Button";
   Color _backgroundColor = Colors.blue;
@@ -12,10 +11,14 @@ class Button {
   double _fontSize = 18.0;
   EdgeInsets _padding = const EdgeInsets.symmetric(horizontal: 40, vertical: 20);
   VoidCallback? _onPressed;
-  String? _clickAudioAsset; // ruta del asset (normalizada)
+  String? _clickAudioAsset;
+
+  // Control de ancho
+  double? _fixedWidth; // null => auto
+  bool _centered = true;
 
   // --------------------------
-  // API simple que pediste
+  // API pública (estilo OOP)
   // --------------------------
   void setText(String text) => _text = text;
   void setBackgroundColor(Color color) => _backgroundColor = color;
@@ -24,20 +27,20 @@ class Button {
   void setPadding(EdgeInsets padding) => _padding = padding;
   void setOnPressed(VoidCallback callback) => _onPressed = callback;
 
-  /// Asigna un asset de audio para reproducir al hacer click.
-  /// Acepta rutas como "assets/audio/click.wav" o "audio/click.wav".
   void setAudioOnClick(String assetPath) {
     _clickAudioAsset = _normalizeAssetPath(assetPath);
   }
 
-  // Normalize para AssetSource: remove leading "assets/" si viene
+  void setFixedWidth(double w) => _fixedWidth = w;
+  void setWidthAuto() => _fixedWidth = null;
+  void setCenteredText(bool centered) => _centered = centered;
+
   static String _normalizeAssetPath(String p) {
     if (p.startsWith('assets/')) p = p.substring(7);
     if (p.startsWith('/')) p = p.substring(1);
     return p;
   }
 
-  /// Devuelve el Widget de Flutter listo para usarse
   Widget build() {
     return _CustomButtonWidget(
       text: _text,
@@ -47,6 +50,8 @@ class Button {
       padding: _padding,
       onPressed: _onPressed,
       clickAudioAsset: _clickAudioAsset,
+      fixedWidth: _fixedWidth,
+      centered: _centered,
     );
   }
 }
@@ -62,6 +67,8 @@ class _CustomButtonWidget extends StatefulWidget {
   final EdgeInsets padding;
   final VoidCallback? onPressed;
   final String? clickAudioAsset;
+  final double? fixedWidth;
+  final bool centered;
 
   const _CustomButtonWidget({
     required this.text,
@@ -71,6 +78,8 @@ class _CustomButtonWidget extends StatefulWidget {
     required this.padding,
     required this.onPressed,
     required this.clickAudioAsset,
+    this.fixedWidth,
+    this.centered = true,
     Key? key,
   }) : super(key: key);
 
@@ -81,61 +90,70 @@ class _CustomButtonWidget extends StatefulWidget {
 class _CustomButtonWidgetState extends State<_CustomButtonWidget> {
   bool _isPressed = false;
 
-  // Reproduce el sonido (no bloqueante). Creamos un AudioPlayer en modo lowLatency.
+  // Reproduce el sonido correctamente sin cortarlo
   Future<void> _playClickSound(String assetPath) async {
     try {
       final player = AudioPlayer();
+      player.onPlayerComplete.listen((event) {
+        try {
+          player.dispose();
+        } catch (_) {}
+      });
       await player.setReleaseMode(ReleaseMode.stop);
       await player.play(AssetSource(assetPath));
-      player.dispose();
     } catch (e) {
-      // Si falla la reproducción no hacemos nada (no rompe la UI).
-      // Puedes agregar logging si quieres.
+      // Ignorar errores de audio
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    Widget animated = AnimatedContainer(
+      duration: const Duration(milliseconds: 100),
+      margin: const EdgeInsets.symmetric(vertical: 8), // separación entre botones
+      padding: widget.padding,
+      decoration: BoxDecoration(
+        color: _isPressed
+            ? widget.backgroundColor.withOpacity(0.7)
+            : widget.backgroundColor,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: _isPressed
+            ? []
+            : [
+                BoxShadow(
+                  color: widget.backgroundColor.withOpacity(0.4),
+                  offset: const Offset(0, 4),
+                  blurRadius: 6,
+                ),
+              ],
+      ),
+      child: Text(
+        widget.text,
+        textAlign: widget.centered ? TextAlign.center : TextAlign.left,
+        style: TextStyle(
+          color: widget.textColor,
+          fontSize: widget.fontSize,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+
+    // Si hay ancho fijo, envolver en SizedBox
+    if (widget.fixedWidth != null) {
+      animated = SizedBox(width: widget.fixedWidth, child: animated);
+    }
+
     return GestureDetector(
       onTapDown: (_) => setState(() => _isPressed = true),
       onTapUp: (_) async {
         setState(() => _isPressed = false);
-        // Primero reproducimos el sonido (fire-and-forget)
         if (widget.clickAudioAsset != null) {
           _playClickSound(widget.clickAudioAsset!);
         }
-        // Luego llamamos al callback del usuario
         widget.onPressed?.call();
       },
       onTapCancel: () => setState(() => _isPressed = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 100),
-        padding: widget.padding,
-        decoration: BoxDecoration(
-          color: _isPressed
-              ? widget.backgroundColor.withOpacity(0.7)
-              : widget.backgroundColor,
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: _isPressed
-              ? []
-              : [
-                  BoxShadow(
-                    color: widget.backgroundColor.withOpacity(0.4),
-                    offset: const Offset(0, 4),
-                    blurRadius: 6,
-                  ),
-                ],
-        ),
-        child: Text(
-          widget.text,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: widget.textColor,
-            fontSize: widget.fontSize,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
+      child: animated,
     );
   }
 }

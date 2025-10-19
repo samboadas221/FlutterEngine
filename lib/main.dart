@@ -43,7 +43,7 @@ class MyGame extends StatelessWidget {
 
     // ==== Configurar acciones de botones ====
     buttonPlay.setOnPressed(() {
-      print("Iniciar juego...");
+      // Nothing yet
     });
 
     buttonSettings.setOnPressed(() {
