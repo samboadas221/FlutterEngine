@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'CustomButton.dart';
 import 'CustomMenu.dart';
+import 'SoundManager.dart';
 
 void main() {
   runApp(const MyGame());
@@ -12,52 +13,31 @@ class MyGame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ==== Crear botones ====
+    SoundManager.instance.playBackground('audio/music.opus');
+
     Button buttonPlay = Button();
     buttonPlay.setText("Jugar");
-    buttonPlay.setAudioOnClick("audio/click2.opus");
+    buttonPlay.setAudioOnClick("audio/click.mp3");
 
     Button buttonSettings = Button();
-    buttonSettings.setText("Configuración");
-    buttonSettings.setAudioOnClick("audio/click2.opus");
+    buttonSettings.setText("Opciones");
+    buttonSettings.setAudioOnClick("audio/click.mp3");
 
     Button buttonExit = Button();
     buttonExit.setText("Salir");
-    buttonExit.setAudioOnClick("audio/click2.opus");
-
-    Button backButton = Button();
-    backButton.setText("Volver");
-    backButton.setAudioOnClick("audio/click2.opus");
-
-    // ==== Crear menús ====
+    buttonExit.setAudioOnClick("audio/click.mp3");
+    
     Menu menuPrincipal = Menu(name: "Principal");
-    Menu menuOpciones = Menu(name: "Opciones");
-
     menuPrincipal.add(buttonPlay);
     menuPrincipal.add(buttonSettings);
     menuPrincipal.add(buttonExit);
 
-    menuOpciones.add(backButton);
+    menuPrincipal.matchButtonWidths();
 
     menuPrincipal.setAsDefaultMenu();
 
-    // ==== Configurar acciones de botones ====
-    buttonPlay.setOnPressed(() {
-      // Nothing yet
-    });
-
-    buttonSettings.setOnPressed(() {
-      menuPrincipal.hide();
-      menuOpciones.show();
-    });
-
-    backButton.setOnPressed(() {
-      menuOpciones.hide();
-      menuPrincipal.show();
-    });
-
-    // ==== Mostrar en pantalla ====
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         backgroundColor: Colors.black,
         body: MenuManager.buildMenusLayer(),

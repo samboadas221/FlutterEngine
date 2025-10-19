@@ -39,7 +39,7 @@ class MenuManager {
 
 /// Clase Menu — contenedor simple de widgets (botones u otros).
 class Menu {
-  final List<Widget> _children = [];
+  final List<dynamic> _children = [];
   bool _visible = false;
   VoidCallback? _update;
   final String name;
@@ -51,11 +51,38 @@ class Menu {
   void setAsDefaultMenu() {
     MenuManager.show(this);
   }
+  
+  void matchButtonWidths() {
+    double maxWidth = 0.0;
+    for (var item in _children) {
+      if (item is Button) {
+        final text = item.getText();
+        final fontSize = item.getFontSize();
+        final padding = item.getPadding();
 
+        final TextPainter tp = TextPainter(
+          text: TextSpan(text: text, style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold)),
+          textDirection: TextDirection.ltr,
+        )..layout();
+
+        final double estimated = tp.width + padding.horizontal;
+        if (estimated > maxWidth) maxWidth = estimated;
+      }
+    }
+
+    if (maxWidth > 0) {
+      for (var item in _children) {
+        if (item is Button) {
+          item.setFixedWidth(maxWidth);
+        }
+      }
+      _update?.call();
+    }
+  }
+  
   void add(dynamic widget) {
-    // Acepta tanto Button (nuestro) como cualquier Widget
     if (widget is Button) {
-      _children.add(widget.build());
+      _children.add(widget);
     } else if (widget is Widget) {
       _children.add(widget);
     } else {
@@ -95,14 +122,25 @@ class _MenuWidgetState extends State<_MenuWidget> {
   @override
   Widget build(BuildContext context) {
     if (!widget.menu._visible) {
-      return const SizedBox.shrink(); // invisible
+      return const SizedBox.shrink();
     }
+
+    List<Widget> widgets = widget.menu._children.map<Widget>((item) {
+      if (item is Button) {
+        return item.build();
+      } else if (item is Widget) {
+        return item;
+      } else {
+        return const SizedBox.shrink();
+      }
+    }).toList();
 
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: widget.menu._children,
+        children: widgets,
       ),
     );
   }
+  
 }

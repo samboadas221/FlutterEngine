@@ -34,6 +34,10 @@ class Button {
   void setFixedWidth(double w) => _fixedWidth = w;
   void setWidthAuto() => _fixedWidth = null;
   void setCenteredText(bool centered) => _centered = centered;
+  
+  String getText() => _text;
+  double getFontSize() => _fontSize;
+  EdgeInsets getPadding() => _padding;
 
   static String _normalizeAssetPath(String p) {
     if (p.startsWith('assets/')) p = p.substring(7);
