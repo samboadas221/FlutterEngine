@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'SoundManager.dart';
 
 /// Un botón completamente personalizable, con API simple.
 /// Permite sonido, color, texto, ancho fijo, etc.
@@ -94,22 +95,16 @@ class _CustomButtonWidget extends StatefulWidget {
 class _CustomButtonWidgetState extends State<_CustomButtonWidget> {
   bool _isPressed = false;
 
-  // Reproduce el sonido correctamente sin cortarlo
   Future<void> _playClickSound(String assetPath) async {
-    try {
-      final player = AudioPlayer();
-      player.onPlayerComplete.listen((event) {
-        try {
-          player.dispose();
-        } catch (_) {}
-      });
-      await player.setReleaseMode(ReleaseMode.stop);
-      await player.play(AssetSource(assetPath));
-    } catch (e) {
-      // Ignorar errores de audio
-    }
+  try {
+    // Ahora usamos el SoundManager global para evitar conflictos con la música de fondo
+    SoundManager.instance.playSfx(assetPath);
+  } catch (e) {
+    // No hacemos nada si falla
   }
-
+}
+  
+  
   @override
   Widget build(BuildContext context) {
     Widget animated = AnimatedContainer(
