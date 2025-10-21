@@ -7,40 +7,39 @@ class SoundManager {
   static final SoundManager instance = SoundManager._internal();
   
   // Configuración específica para música de fondo
-static final AudioContext bgContext = AudioContext(
-  iOS: AudioContextIOS(
-    category: AVAudioSessionCategory.playback,
-    options: [],
-  ),
-  android: AudioContextAndroid(
-    isSpeakerphoneOn: false,
-    stayAwake: true,
-    contentType: AndroidContentType.music,
-    usageType: AndroidUsageType.media,
-    audioFocus: AndroidAudioFocus.gain,
-  ),
-);
+  static final AudioContext bgContext = AudioContext(
+    iOS: AudioContextIOS(
+      category: AVAudioSessionCategory.playback,
+      options: [],
+    ),
+    android: AudioContextAndroid(
+      isSpeakerphoneOn: false,
+      stayAwake: true,
+      contentType: AndroidContentType.music,
+      usageType: AndroidUsageType.media,
+      audioFocus: AndroidAudioFocus.gain,
+    ),
+  );
 
-// Configuración específica para efectos (SFX)
-static final AudioContext sfxContext = AudioContext(
-  iOS: AudioContextIOS(
-    category: AVAudioSessionCategory.ambient,
-    options: [AVAudioSessionCategoryOptions.mixWithOthers],
-  ),
-  android: AudioContextAndroid(
-    isSpeakerphoneOn: false,
-    stayAwake: false,
-    contentType: AndroidContentType.sonification,
-    usageType: AndroidUsageType.assistanceSonification,
-    audioFocus: AndroidAudioFocus.gainTransientMayDuck,
-  ),
-);
+  // Configuración específica para efectos (SFX)
+  static final AudioContext sfxContext = AudioContext(
+    iOS: AudioContextIOS(
+      category: AVAudioSessionCategory.ambient,
+      options: [AVAudioSessionCategoryOptions.mixWithOthers],
+    ),
+    android: AudioContextAndroid(
+      isSpeakerphoneOn: false,
+      stayAwake: false,
+      contentType: AndroidContentType.sonification,
+      usageType: AndroidUsageType.assistanceSonification,
+      audioFocus: AndroidAudioFocus.gainTransientMayDuck,
+    ),
+  );
 
-  final AudioPlayer _bgPlayer = AudioPlayer();
+  AudioPlayer? _bgPlayer;
   // Opcional: pool simple para SFX (no imprescindible ahora)
   // final List<AudioPlayer> _sfxPool = [];
 
-  
   Future<void> playBackground(String assetPath, {double volume = 1.0}) async {
   try {
     // Crear el player si aún no existe
@@ -82,7 +81,7 @@ static final AudioContext sfxContext = AudioContext(
   Future<void> playSfx(String assetPath) async {
     try {
       final p = AudioPlayer();
-      await player.setAudioContext(sfxContext);
+      await p.setAudioContext(sfxContext);
       p.onPlayerComplete.listen((_) {
         try {
           p.dispose();
