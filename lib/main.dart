@@ -14,21 +14,23 @@ class MyGame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
       
+      SoundManager.instance.playBackground("audio/song1.m4a");
+      
       Button song1 = Button();
       song1.setText("My Type");
-      song1.setAudioOnClick("audio/song1.m4a");
+      song1.setAudioOnClick("audio/click.mp3");
       
       Button song2 = Button();
       song2.setText("Somewhere");
-      song2.setAudioOnClick("audio/song2.m4a");
+      song2.setAudioOnClick("audio/click.mp3");
       
       Button song3 = Button();
       song3.setText("Amarte");
-      song3.setAudioOnClick("audio/song3.m4a");
+      song3.setAudioOnClick("audio/click.mp3");
       
       Button song4 = Button();
       song4.setText("Matters");
-      song4.setAudioOnClick("audio/song4.m4a");
+      song4.setAudioOnClick("audio/click.mp3");
       
       Menu menu = Menu(name: "Principal");
       menu.add(song1);
