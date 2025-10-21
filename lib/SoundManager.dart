@@ -18,6 +18,7 @@ import 'package:soundpool/soundpool.dart';
 ///   SoundManager.instance.stopBackground();
 ///   SoundManager.instance.setBackgroundVolume(0.5);
 ///   SoundManager.instance.disposeAll();
+
 class SoundManager {
   SoundManager._internal();
   static final SoundManager instance = SoundManager._internal();
@@ -92,7 +93,7 @@ class SoundManager {
         // loop: 0 => play once, -1 => loop forever (Soundpool behavior)
         // rate: playback rate (1.0 normal). Soundpool expects int sample rate speed 0..100?
         // soundpool uses 'play' with optional 'repeat' and 'rate' in some implementations
-        await _soundpool.play(soundId, repeat: loop ?? 0, playbackRate: rate ?? 1.0);
+        await _soundpool.play(soundId, repeat: loop ?? 0, rate: rate ?? 1.0);
       }
     } catch (e) {
       // no romper por fallos de SFX
@@ -104,7 +105,7 @@ class SoundManager {
     try {
       for (var entry in _soundIdCache.entries) {
         try {
-          await _soundpool.unload(entry.value);
+          await _soundpool.release(entry.value);
         } catch (_) {}
       }
       _soundIdCache.clear();

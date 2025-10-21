@@ -65,7 +65,7 @@ class Menu {
           textDirection: TextDirection.ltr,
         )..layout();
 
-        final double estimated = tp.width + padding.horizontal;
+        double double estimated = tp.width + padding.horizontal;
         estimated = estimated * 1.05;
         if (estimated > maxWidth) maxWidth = estimated;
       }
