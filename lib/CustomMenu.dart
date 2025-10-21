@@ -66,7 +66,8 @@ class Menu {
         )..layout();
 
         final double estimated = tp.width + padding.horizontal;
-        if (estimated > maxWidth) maxWidth = estimated + 2;
+        estimated = estimated * 1.05;
+        if (estimated > maxWidth) maxWidth = estimated;
       }
     }
 

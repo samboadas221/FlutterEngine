@@ -1,37 +1,45 @@
 
 // lib/SoundManager.dart
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:soundpool/soundpool.dart';
 
-/// SoundManager robusto para proyectos Flutter usando audioplayers 6.x.
-/// - _bgPlayer: reproductor persistente para música de fondo.
-/// - _sfxPool: pool de reproductores para efectos (SFX), con marca de uso.
-/// - playSfx crea reproductores temporales si el pool está lleno.
-/// - Evita llamadas a APIs no disponibles en la versión 6.x.
+/// SoundManager híbrido:
+/// - Usa AudioPlayer (audioplayers) para la música de fondo (persistent player).
+/// - Usa Soundpool para SFX (baja latencia, no roba audio focus).
+///
+/// Requisitos:
+/// - Dependencia en pubspec.yaml: soundpool: ^2.1.0
+///
+/// API:
+///   SoundManager.instance.playBackground('audio/music.mp3');
+///   SoundManager.instance.playSfx('audio/click.wav');
+///   SoundManager.instance.pauseBackground();
+///   SoundManager.instance.stopBackground();
+///   SoundManager.instance.setBackgroundVolume(0.5);
+///   SoundManager.instance.disposeAll();
 class SoundManager {
   SoundManager._internal();
   static final SoundManager instance = SoundManager._internal();
 
-  // --- Música de fondo ---
+  // --- BG music player (audioplayers) ---
   AudioPlayer? _bgPlayer;
 
-  // --- Pool de SFX ---
-  final List<AudioPlayer> _sfxPool = [];
-  final Set<AudioPlayer> _sfxInUse = {};
-  final int _maxPoolSize = 6; // ajustable según necesidades
+  // --- SoundPool for SFX ---
+  final Soundpool _soundpool = Soundpool(streamType: StreamType.notification);
+  final Map<String, int> _soundIdCache = {}; // assetPath -> soundId
 
-  // -----------------------
-  // MÚSICA DE FONDO
-  // -----------------------
   /// Reproduce o cambia la música de fondo.
-  /// assetPath: ruta relativa dentro de assets/ (ej: "audio/music.mp3")
+  /// assetPath: ruta relativa en assets/ (ej. 'audio/music.mp3' o 'audio/song1.m4a')
   Future<void> playBackground(String assetPath, {double volume = 1.0}) async {
     try {
       _bgPlayer ??= AudioPlayer();
       await _bgPlayer!.setReleaseMode(ReleaseMode.loop);
       await _bgPlayer!.setVolume(volume.clamp(0.0, 1.0));
+      // En audioplayers, AssetSource espera "audio/file.ext" si assets/ fue declarado.
       await _bgPlayer!.play(AssetSource(assetPath));
     } catch (e) {
-      // No romper la app por fallos de audio
+      // No romper la app por errores de audio
     }
   }
 
@@ -60,85 +68,61 @@ class SoundManager {
   }
 
   // -----------------------
-  // SFX (efectos), pool
+  // SFX (usando Soundpool)
   // -----------------------
-  /// Reproduce un efecto de sonido (fire-and-forget).
-  /// Usa un pool para evitar crear/destruir demasiados AudioPlayers.
-  Future<void> playSfx(String assetPath) async {
+  /// Reproduce un efecto de sonido. Usa Soundpool (baja latencia,
+  /// no roba audio focus en Android en la mayoría de dispositivos).
+  ///
+  /// assetPath: ruta relativa dentro de assets/, por ejemplo 'audio/click.mp3'
+  Future<void> playSfx(String assetPath, {int? loop = 0, double? rate}) async {
     try {
-      AudioPlayer? player;
-      bool isTemporary = false;
+      if (assetPath.isEmpty) return;
 
-      // Buscar un player disponible en el pool (no en uso)
-      for (var p in _sfxPool) {
-        if (!_sfxInUse.contains(p)) {
-          player = p;
-          break;
-        }
+      // Si ya cargamos ese asset, usamos el id cached
+      int? soundId = _soundIdCache[assetPath];
+      if (soundId == null) {
+        // Cargar bytes desde assets
+        final bytes = await rootBundle.load('assets/$assetPath');
+        final uint8list = bytes.buffer.asUint8List();
+        soundId = await _soundpool.loadUint8List(uint8list);
+        _soundIdCache[assetPath] = soundId;
       }
 
-      if (player == null) {
-        if (_sfxPool.length < _maxPoolSize) {
-          // Crear y añadir al pool
-          player = AudioPlayer();
-          _sfxPool.add(player);
-          // Registrar listener que marca libre cuando termine (solo una vez)
-          player.onPlayerComplete.listen((_) {
-            // marca como no en uso si estaba marcado
-            try {
-              _sfxInUse.remove(player);
-              // aseguramos que no esté reproduciendo
-              player?.stop();
-            } catch (_) {}
-          });
-        } else {
-          // Pool lleno -> crear player temporal que se destruirá al terminar
-          player = AudioPlayer();
-          isTemporary = true;
-        }
+      if (soundId != null) {
+        // loop: 0 => play once, -1 => loop forever (Soundpool behavior)
+        // rate: playback rate (1.0 normal). Soundpool expects int sample rate speed 0..100?
+        // soundpool uses 'play' with optional 'repeat' and 'rate' in some implementations
+        await _soundpool.play(soundId, repeat: loop ?? 0, playbackRate: rate ?? 1.0);
       }
-
-      // Marcar en uso si es parte del pool
-      if (!isTemporary) {
-        _sfxInUse.add(player!);
-      }
-
-      // Preparar y reproducir
-      await player!.setReleaseMode(ReleaseMode.stop);
-      await player.play(AssetSource(assetPath));
-
-      if (isTemporary) {
-        // Liberar cuando termine (para temporales)
-        player.onPlayerComplete.listen((_) async {
-          try {
-            await player?.stop();
-            await player?.dispose();
-          } catch (_) {}
-        });
-      }
-      // Si es del pool, el listener registrado previamente se encargará de
-      // marcarlo como no en uso al terminar (no lo disposa para reutilizar).
     } catch (e) {
-      // Ignorar errores de reproducción SFX
+      // no romper por fallos de SFX
     }
   }
 
-  // Opcional: libera todos los recursos
-  Future<void> disposeAll() async {
+  /// Opcional: libera recursos cargados de SFX (no hace stop de bg)
+  Future<void> unloadAllSfx() async {
     try {
-      for (var p in _sfxPool) {
+      for (var entry in _soundIdCache.entries) {
         try {
-          await p.stop();
-          await p.dispose();
+          await _soundpool.unload(entry.value);
         } catch (_) {}
       }
-      _sfxPool.clear();
-      _sfxInUse.clear();
+      _soundIdCache.clear();
+    } catch (_) {}
+  }
+
+  /// Libera todos los recursos (SFX + background).
+  Future<void> disposeAll() async {
+    try {
+      await unloadAllSfx();
       try {
         await _bgPlayer?.stop();
         await _bgPlayer?.dispose();
       } catch (_) {}
       _bgPlayer = null;
+      try {
+        await _soundpool.release();
+      } catch (_) {}
     } catch (_) {}
   }
 }

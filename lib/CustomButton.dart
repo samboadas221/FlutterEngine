@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'SoundManager.dart';
 
-/// Un botón completamente personalizable, con API simple.
-/// Permite sonido, color, texto, ancho fijo, etc.
+// Un botón completamente personalizable, con API simple.
+// Permite sonido, color, texto, ancho fijo, etc.
 class Button {
   String _text = "Button";
   Color _backgroundColor = Colors.blue;
