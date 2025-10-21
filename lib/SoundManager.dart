@@ -105,7 +105,7 @@ class SoundManager {
     try {
       for (var entry in _soundIdCache.entries) {
         try {
-          await _soundpool.release(entry.value);
+          await _soundpool.release();
         } catch (_) {}
       }
       _soundIdCache.clear();
