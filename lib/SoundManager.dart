@@ -2,40 +2,36 @@
 // lib/SoundManager.dart
 import 'package:audioplayers/audioplayers.dart';
 
-/// SoundManager simple y robusto.
-/// - Reproductor persistente para música de fondo (_bgPlayer).
-/// - Pool sencillo para SFX (permite reproducir varios efectos simultáneos).
-/// - APIs: playBackground, stopBackground, pauseBackground, resumeBackground,
-///   setBackgroundVolume, playSfx.
-///
-/// Nota: evita importar APIs internas de audioplayers_platform_interface para
-/// evitar incompatibilidades en distintos entornos y versiones.
+/// SoundManager robusto para proyectos Flutter usando audioplayers 6.x.
+/// - _bgPlayer: reproductor persistente para música de fondo.
+/// - _sfxPool: pool de reproductores para efectos (SFX), con marca de uso.
+/// - playSfx crea reproductores temporales si el pool está lleno.
+/// - Evita llamadas a APIs no disponibles en la versión 6.x.
 class SoundManager {
   SoundManager._internal();
   static final SoundManager instance = SoundManager._internal();
 
-  // Player para la música de fondo (nullable hasta inicialización)
+  // --- Música de fondo ---
   AudioPlayer? _bgPlayer;
 
-  // Pool para SFX: reusar players si hay disponibles, evitar crear/destruir demasiado.
+  // --- Pool de SFX ---
   final List<AudioPlayer> _sfxPool = [];
-  final int _maxPoolSize = 6; // puedes ajustar según necesidades
+  final Set<AudioPlayer> _sfxInUse = {};
+  final int _maxPoolSize = 6; // ajustable según necesidades
 
   // -----------------------
   // MÚSICA DE FONDO
   // -----------------------
-  /// Reproduce o cambia la música de fondo (assetPath relativo a assets/, ej "audio/music.mp3").
+  /// Reproduce o cambia la música de fondo.
+  /// assetPath: ruta relativa dentro de assets/ (ej: "audio/music.mp3")
   Future<void> playBackground(String assetPath, {double volume = 1.0}) async {
     try {
-      // Crear el player si no existe
       _bgPlayer ??= AudioPlayer();
-      // Configs: loop y volumen
       await _bgPlayer!.setReleaseMode(ReleaseMode.loop);
       await _bgPlayer!.setVolume(volume.clamp(0.0, 1.0));
-      // Reproducir (AssetSource espera ruta relativa a assets/)
       await _bgPlayer!.play(AssetSource(assetPath));
     } catch (e) {
-      // No rompemos la app por fallos de audio
+      // No romper la app por fallos de audio
     }
   }
 
@@ -66,16 +62,16 @@ class SoundManager {
   // -----------------------
   // SFX (efectos), pool
   // -----------------------
-  /// Reproduce un efecto de sonido (fire-and-forget). Usa un pool para permitir
-  /// varios efectos simultáneos sin crear/destruir cientos de AudioPlayers.
+  /// Reproduce un efecto de sonido (fire-and-forget).
+  /// Usa un pool para evitar crear/destruir demasiados AudioPlayers.
   Future<void> playSfx(String assetPath) async {
     try {
-      // Buscar un player libre en el pool
       AudioPlayer? player;
+      bool isTemporary = false;
+
+      // Buscar un player disponible en el pool (no en uso)
       for (var p in _sfxPool) {
-        // comprobamos estado; si está detenido o completado lo podemos reutilizar
-        final state = await p.getState();
-        if (state == PlayerState.stopped || state == PlayerState.completed) {
+        if (!_sfxInUse.contains(p)) {
           player = p;
           break;
         }
@@ -83,47 +79,51 @@ class SoundManager {
 
       if (player == null) {
         if (_sfxPool.length < _maxPoolSize) {
+          // Crear y añadir al pool
           player = AudioPlayer();
           _sfxPool.add(player);
+          // Registrar listener que marca libre cuando termine (solo una vez)
+          player.onPlayerComplete.listen((_) {
+            // marca como no en uso si estaba marcado
+            try {
+              _sfxInUse.remove(player);
+              // aseguramos que no esté reproduciendo
+              player?.stop();
+            } catch (_) {}
+          });
         } else {
-          // Si pool lleno, creamos uno temporal (no lo añadimos al pool)
+          // Pool lleno -> crear player temporal que se destruirá al terminar
           player = AudioPlayer();
+          isTemporary = true;
         }
       }
 
-      // Aseguramos que el player libere recursos cuando termine (solo para los temporales o si queremos)
-      // Si es parte del pool, lo mantenemos para reutilizarlo.
-      bool isTemporary = !_sfxPool.contains(player);
+      // Marcar en uso si es parte del pool
+      if (!isTemporary) {
+        _sfxInUse.add(player!);
+      }
 
       // Preparar y reproducir
-      await player.setReleaseMode(ReleaseMode.stop);
-      // no await para no bloquear la UI; pero aseguramos que la llamada a play se realice
+      await player!.setReleaseMode(ReleaseMode.stop);
       await player.play(AssetSource(assetPath));
 
       if (isTemporary) {
-        // Liberar cuando termine
+        // Liberar cuando termine (para temporales)
         player.onPlayerComplete.listen((_) async {
           try {
-            await player.stop();
-            await player.dispose();
-          } catch (_) {}
-        });
-      } else {
-        // Si es del pool, dejamos que quede para reutilización; opcionalmente
-        // podemos limpiar listeners para evitar duplicados.
-        player.onPlayerComplete.listen((_) async {
-          try {
-            await player.stop();
-            // No hacemos dispose para poder reutilizar
+            await player?.stop();
+            await player?.dispose();
           } catch (_) {}
         });
       }
+      // Si es del pool, el listener registrado previamente se encargará de
+      // marcarlo como no en uso al terminar (no lo disposa para reutilizar).
     } catch (e) {
-      // no romper la app por errores de audio
+      // Ignorar errores de reproducción SFX
     }
   }
 
-  // Opcional: liberar todos los recursos de audio (si necesitas cerrar la app)
+  // Opcional: libera todos los recursos
   Future<void> disposeAll() async {
     try {
       for (var p in _sfxPool) {
@@ -133,6 +133,7 @@ class SoundManager {
         } catch (_) {}
       }
       _sfxPool.clear();
+      _sfxInUse.clear();
       try {
         await _bgPlayer?.stop();
         await _bgPlayer?.dispose();
