@@ -94,14 +94,10 @@ class _CustomButtonWidget extends StatefulWidget {
 
 class _CustomButtonWidgetState extends State<_CustomButtonWidget> {
   bool _isPressed = false;
-
   Future<void> _playClickSound(String assetPath) async {
   try {
-    // Ahora usamos el SoundManager global para evitar conflictos con la música de fondo
-    SoundManager.instance.playSfx(assetPath);
-  } catch (e) {
-    // No hacemos nada si falla
-  }
+    SoundManager().playSoundEffect(assetPath);
+  } catch (e) {}
 }
   
   
