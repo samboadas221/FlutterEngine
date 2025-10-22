@@ -28,8 +28,9 @@ class Button {
   void setPadding(EdgeInsets padding) => _padding = padding;
   void setOnPressed(VoidCallback callback) => _onPressed = callback;
 
-  void setAudioOnClick(String assetPath) {
+  void setAudioOnClick(String assetPath, SoundManager audioPlayer) {
     _clickAudioAsset = _normalizeAssetPath(assetPath);
+    _audioPlayer = audioPlayer;
   }
 
   void setFixedWidth(double w) => _fixedWidth = w;
@@ -55,6 +56,7 @@ class Button {
       padding: _padding,
       onPressed: _onPressed,
       clickAudioAsset: _clickAudioAsset,
+      audioPlayer: _audioPlayer,
       fixedWidth: _fixedWidth,
       centered: _centered,
     );
@@ -72,6 +74,7 @@ class _CustomButtonWidget extends StatefulWidget {
   final EdgeInsets padding;
   final VoidCallback? onPressed;
   final String? clickAudioAsset;
+  final SoundManager? audioPlayer;
   final double? fixedWidth;
   final bool centered;
 
@@ -83,6 +86,7 @@ class _CustomButtonWidget extends StatefulWidget {
     required this.padding,
     required this.onPressed,
     required this.clickAudioAsset,
+    required this.audioPlayer,
     this.fixedWidth,
     this.centered = true,
     Key? key,
@@ -149,7 +153,7 @@ class _CustomButtonWidgetState extends State<_CustomButtonWidget> {
       onTapUp: (_) async {
         setState(() => _isPressed = false);
         if (widget.clickAudioAsset != null) {
-          _playClickSound(widget.clickAudioAsset!);
+          _playClickSound(widget.clickAudioAsset!, widget.audioPlayer!);
         }
         widget.onPressed?.call();
       },
