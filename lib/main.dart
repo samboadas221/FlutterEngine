@@ -20,32 +20,35 @@ class _MyGameState extends State<MyGame> {
   void initState() {
     super.initState();
     // Iniciamos la música una sola vez al montar el widget
-    // SoundManager().playBackgroundMusic("audio/song1.m4a");
+    SoundManager().playAsset("audio/song1.m4a");
   }
+  
+  @override
+  void dispose(){
+    SoundManager().dispose();
+    super.dispose();
+  }
+  
 
   @override
   Widget build(BuildContext context) {
     
-    SoundManager audioPlayer = SoundManager();
-    
-    audioPlayer.playMusic("audio/song1.m4a");
-    
     // ======= Crear botones =======
     Button song1 = Button();
     song1.setText("JUGAR");
-    song1.setAudioOnClick("audio/click.mp3", audioPlayer);
+    song1.setAudioOnClick("audio/click.mp3");
 
     Button song2 = Button();
-    song2.setText("AjusTEs");
-    song2.setAudioOnClick("audio/click.mp3", audioPlayer);
+    song2.setText("AJUSTES");
+    song2.setAudioOnClick("audio/click.mp3");
 
     Button song3 = Button();
-    song3.setText("opciones");
-    song3.setAudioOnClick("audio/click.mp3", audioPlayer);
+    song3.setText("OPCIONES");
+    song3.setAudioOnClick("audio/click.mp3");
 
     Button song4 = Button();
-    song4.setText("sAliR");
-    song4.setAudioOnClick("audio/click.mp3", audioPlayer);
+    song4.setText("SALIR");
+    song4.setAudioOnClick("audio/click.mp3");
 
     Menu menu = Menu(name: "Principal");
     menu.add(song1);
