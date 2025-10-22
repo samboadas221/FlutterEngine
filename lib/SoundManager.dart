@@ -11,12 +11,19 @@ class SoundManager {
   static Future<void> init({int poolSize = 10}) async {
     if (_initialized) return;
     _initialized = true;
-
+    
+    final config = AudioContextConfig(
+      focus: AudioContextConfigFocus.mixWithOthers,
+      respectSilence: false,  // Play even if device is silent
+    );
+    final audioContext = config.build();
+    
     _musicPlayer = AudioPlayer(); // Dedicated player for background music
-
+    await _musicPlayer.setAudioContext(audioContext);
     // Create a pool of players for simultaneous sound effects
     for (int i = 0; i < poolSize; i++) {
       final player = AudioPlayer();
+      await player.setAudioContext(audioContext);
       _effectPool.add(player);
     }
   }
@@ -37,9 +44,16 @@ class SoundManager {
   /// Play a short sound effect (non-blocking)
   static Future<void> playFastEffect(String path, {double volume = 1.0}) async {
     if (_effectPool.isEmpty) return;
-
+    
+    final config = AudioContextConfig(
+      focus: AudioContextConfigFocus.mixWithOthers,
+      respectSilence: false,  // Play even if device is silent
+    );
+    final audioContext = config.build();
+    
     // Pick next player in pool (round robin)
     final player = _effectPool[_nextEffect];
+    await player.setAudioContext(audioContext);
     _nextEffect = (_nextEffect + 1) % _effectPool.length;
 
     // Reuse safely: stop any previous sound before replay
@@ -54,6 +68,15 @@ class SoundManager {
   static Future<void> preloadFastEffect(String path) async {
     if (_effectPool.isEmpty) return;
     final player = _effectPool.first;
+    
+    final config = AudioContextConfig(
+      focus: AudioContextConfigFocus.mixWithOthers,
+      respectSilence: false,  // Play even if device is silent
+    );
+    final audioContext = config.build();
+    
+    await player.setAudioContext(audioContext);
+    
     await player.setVolume(0);
     await player.play(AssetSource(path));
     await player.stop();

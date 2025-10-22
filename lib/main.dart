@@ -1,7 +1,4 @@
 
-/*
-
-// OLD MAIN
 import 'package:flutter/material.dart';
 import 'CustomButton.dart';
 import 'CustomMenu.dart';
@@ -76,7 +73,10 @@ class _MyGameState extends State<MyGame> {
     );
   }
 }
-*/
+
+
+/*
+// WORKING DUAL AUDIO
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
@@ -160,3 +160,5 @@ class _AudioPlayerDemoState extends State<AudioPlayerDemo> {
     );
   }
 }
+
+*/
