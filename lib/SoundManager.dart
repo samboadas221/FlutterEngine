@@ -10,8 +10,7 @@ class SoundManager{
   
   Future <void> playMusic(String path) async {
     try {
-      // await music.play(AssetSource(path));
-      await music.play(DeviceFileSource(path));
+      await music.play(AssetSource(path));
     } catch (e){
       // We do shit
     }
@@ -19,8 +18,7 @@ class SoundManager{
   
   Future <void> playEffect(String path) async {
     try {
-      // await effect.play(AssetSource(path));
-      await effect.play(DeviceFileSource(path));
+      await effect.play(AssetSource(path));
     } catch (e){
       // We do shit
     }
