@@ -13,6 +13,7 @@ class Button {
   EdgeInsets _padding = const EdgeInsets.symmetric(horizontal: 40, vertical: 20);
   VoidCallback? _onPressed;
   String? _clickAudioAsset;
+  SoundManager? _audioPlayer;
 
   // Control de ancho
   double? _fixedWidth; // null => auto
