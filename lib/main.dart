@@ -28,7 +28,7 @@ class _MyGameState extends State<MyGame> {
   
   @override
   void dispose(){
-    await SoundManager.dispose();
+    SoundManager.dispose();
     super.dispose();
   }
   

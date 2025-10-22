@@ -34,8 +34,10 @@ class SoundManager {
 
     // Create low-latency pool
     for (var i = 0; i < effectPoolSize; i++) {
-      // PlayerMode.lowLatency is recommended for short, instant sounds.
-      _effectPool.add(AudioPlayer(mode: PlayerMode.lowLatency));
+      final player = AudioPlayer();
+      await player.setPlayerMode(PlayerMode.lowLatency);
+      // optionally setReleaseMode if you want (beware of some issues with lowLatency + releaseMode)
+      _effectPool.add(player);
     }
 
     _initialized = true;
