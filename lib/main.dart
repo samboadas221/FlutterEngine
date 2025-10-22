@@ -20,7 +20,7 @@ class _MyGameState extends State<MyGame> {
   void initState() {
     super.initState();
     // Iniciamos la música una sola vez al montar el widget
-    await SoundManager.init();
+    SoundManager.init();
     // await SoundManager.init(poolsize: 10);
     SoundManager.preloadFastEffect("audio/click.mp3");
     SoundManager.playMusic("audio/song1.m4a", loop: true, volume: 0.9);
@@ -28,7 +28,7 @@ class _MyGameState extends State<MyGame> {
   
   @override
   void dispose(){
-    await SoundManager().dispose();
+    await SoundManager.dispose();
     super.dispose();
   }
   
