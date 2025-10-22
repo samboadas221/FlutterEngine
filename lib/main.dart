@@ -26,24 +26,26 @@ class _MyGameState extends State<MyGame> {
   @override
   Widget build(BuildContext context) {
     
-    SoundManager.playMusic("audio/song1.m4a");
+    SoundManager audioPlayer = SoundManager();
+    
+    audioPlayer.playMusic("audio/song1.m4a");
     
     // ======= Crear botones =======
     Button song1 = Button();
     song1.setText("JUGAR");
-    song1.setAudioOnClick("audio/click.mp3");
+    song1.setAudioOnClick("audio/click.mp3", audioPlayer);
 
     Button song2 = Button();
     song2.setText("AjusTEs");
-    song2.setAudioOnClick("audio/click.mp3");
+    song2.setAudioOnClick("audio/click.mp3", audioPlayer);
 
     Button song3 = Button();
     song3.setText("opciones");
-    song3.setAudioOnClick("audio/click.mp3");
+    song3.setAudioOnClick("audio/click.mp3", audioPlayer);
 
     Button song4 = Button();
     song4.setText("sAliR");
-    song4.setAudioOnClick("audio/click.mp3");
+    song4.setAudioOnClick("audio/click.mp3", audioPlayer);
 
     Menu menu = Menu(name: "Principal");
     menu.add(song1);
