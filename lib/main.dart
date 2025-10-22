@@ -1,4 +1,7 @@
 
+/*
+
+// OLD MAIN
 import 'package:flutter/material.dart';
 import 'CustomButton.dart';
 import 'CustomMenu.dart';
@@ -69,6 +72,90 @@ class _MyGameState extends State<MyGame> {
       home: Scaffold(
         backgroundColor: Colors.black,
         body: MenuManager.buildMenusLayer(),
+      ),
+    );
+  }
+}
+*/
+
+import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      home: Scaffold(
+        body: AudioPlayerDemo(),
+      ),
+    );
+  }
+}
+
+class AudioPlayerDemo extends StatefulWidget {
+  const AudioPlayerDemo({super.key});
+
+  @override
+  State<AudioPlayerDemo> createState() => _AudioPlayerDemoState();
+}
+
+class _AudioPlayerDemoState extends State<AudioPlayerDemo> {
+  late AudioPlayer _player1;
+  late AudioPlayer _player2;
+
+  @override
+  void initState() {
+    super.initState();
+    _player1 = AudioPlayer();
+    _player2 = AudioPlayer();
+    _configureAudioContext();
+  }
+
+  Future<void> _configureAudioContext() async {
+    // Set context to allow mixing (no audio focus request on Android to prevent interruptions)
+    final config = AudioContextConfig(
+      focus: AudioContextConfigFocus.mixWithOthers,
+      respectSilence: false,  // Play even if device is silent
+    );
+    final audioContext = config.build();
+
+    await _player1.setAudioContext(audioContext);
+    await _player2.setAudioContext(audioContext);
+  }
+
+  @override
+  void dispose() {
+    _player1.dispose();
+    _player2.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ElevatedButton(
+            onPressed: () {
+              _player1.play(AssetSource('audio/song.m4a'));  // Starts immediately
+            },
+            child: const Text('Play Sound 1'),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () {
+              _player2.play(AssetSource('audio/music.m4a'));  // Starts immediately, overlaps with Sound 1
+            },
+            child: const Text('Play Sound 2'),
+          ),
+        ],
       ),
     );
   }
