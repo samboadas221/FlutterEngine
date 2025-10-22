@@ -25,7 +25,7 @@ class _MyGameState extends State<MyGame> {
   Future<void> setupAudio() async {
     await SoundManager.init();
     await SoundManager.preloadFastEffect("audio/click.mp3");
-    await SoundManager.playMusic("audio/song1.m4a", loop: true, volume: 0.9);
+    await SoundManager.playMusic("audio/song.m4a", loop: true, volume: 0.9);
   }
   
   @override
