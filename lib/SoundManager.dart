@@ -1,50 +1,27 @@
 
 import 'package:audioplayers/audioplayers.dart';
 
-class SoundManager {
-  static final SoundManager _instance = SoundManager._internal();
-  factory SoundManager() => _instance;
-
-  late final AudioPlayer _bgPlayer;
-  late final AudioPlayer _sfxPlayer;
-  bool _isBgPlaying = false;
-
-  SoundManager._internal() {
-    _bgPlayer = AudioPlayer();
-    _sfxPlayer = AudioPlayer();
-  }
-
-  /// Reproduce música de fondo en loop
-  Future<void> playBackgroundMusic(String assetPath) async {
-    if (_isBgPlaying) return;
-
+class SoundManager{
+  
+  final music = AudioPlayer();
+  final effect = AudioPlayer();
+  
+  Future <void> playMusic(String path) async {
     try {
-      await _bgPlayer.setReleaseMode(ReleaseMode.loop);
-      await _bgPlayer.play(AssetSource(assetPath));
-      _isBgPlaying = true;
-    } catch (e) {
-      print('Error al reproducir música de fondo: $e');
+      // await music.play(AssetSource(path));
+      await music.play(DeviceFileSource(path));
+    } catch (e){
+      // We do shit
     }
   }
-
-  /// Detiene la música de fondo
-  Future<void> stopBackgroundMusic() async {
-    await _bgPlayer.stop();
-    _isBgPlaying = false;
-  }
-
-  /// Reproduce un sonido corto encima de la música
-  Future<void> playSoundEffect(String assetPath) async {
+  
+  Future <void> playEffect(String path) async {
     try {
-      await _sfxPlayer.play(AssetSource(assetPath));
-    } catch (e) {
-      print('Error al reproducir efecto de sonido: $e');
+      // await effect.play(AssetSource(path));
+      await effect.play(DeviceFileSource(path));
+    } catch (e){
+      // We do shit
     }
   }
-
-  /// Libera recursos (llamar al cerrar la app)
-  Future<void> dispose() async {
-    await _bgPlayer.dispose();
-    await _sfxPlayer.dispose();
-  }
+  
 }

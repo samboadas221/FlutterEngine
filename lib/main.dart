@@ -20,11 +20,14 @@ class _MyGameState extends State<MyGame> {
   void initState() {
     super.initState();
     // Iniciamos la música una sola vez al montar el widget
-    SoundManager().playBackgroundMusic("audio/song1.m4a");
+    // SoundManager().playBackgroundMusic("audio/song1.m4a");
   }
 
   @override
   Widget build(BuildContext context) {
+    
+    SoundManager.playMusic("audio/song1.m4a");
+    
     // ======= Crear botones =======
     Button song1 = Button();
     song1.setText("JUGAR");

@@ -93,12 +93,18 @@ class _CustomButtonWidget extends StatefulWidget {
 }
 
 class _CustomButtonWidgetState extends State<_CustomButtonWidget> {
+  
   bool _isPressed = false;
+  
+  
   Future<void> _playClickSound(String assetPath) async {
-  try {
-    SoundManager().playSoundEffect(assetPath);
-  } catch (e) {}
-}
+    try {
+      SoundManager.playEffect(assetPath);
+    } catch (e) {
+      // Nothing
+    }
+  }
+  
   
   
   @override
