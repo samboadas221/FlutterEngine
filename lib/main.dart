@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'CustomButton.dart';
 import 'CustomMenu.dart';
 import 'SoundManager.dart';
+import 'CustomList.dart';
 
 void main() {
   runApp(const MyGame());
@@ -54,12 +55,28 @@ class _MyGameState extends State<MyGame> {
     Button song4 = Button();
     song4.setText("SALIR");
     song4.setAudioOnClick("audio/click.mp3");
+    
+    CustomList myList = CustomList();
+    myList.setHeadingText("My Custom List");
+    myList.setTopMargin(10.0);
+    myList.setBottomMargin(10.0);
+    myList.setRightMargin(10.0);
+    myList.setLeftMargin(10.0);
+    
+    myList.addItem("Pool");
+    myList.addItem("Rock");
+    myList.addItem("Water");
+    myList.addItem("Oil");
+    myList.addItem("Milk");
+    myList.addItem("Milf");
+    myList.addItem("Car");
 
     Menu menu = Menu(name: "Principal");
     menu.add(song1);
     menu.add(song2);
     menu.add(song3);
     menu.add(song4);
+    menu.add(myList.build());
 
     menu.matchButtonWidths();
     menu.setAsDefaultMenu();
