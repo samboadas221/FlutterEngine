@@ -6,8 +6,25 @@ import 'SoundManager.dart';
 import 'CustomList.dart';
 
 void main() {
-  runApp(const MyGame());
+  runApp(const MyApp());
 }
+
+class MyApp extends StatelessWidget{
+  const MyApp({super.key});
+  
+  @override
+  Widget build(BuildContext context){
+    return const MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Text("My Game")
+        ),
+      )
+    );
+  }
+}
+
+/*
 
 class MyGame extends StatefulWidget {
   const MyGame({super.key});
@@ -90,6 +107,8 @@ class _MyGameState extends State<MyGame> {
     );
   }
 }
+
+*/
 
 
 /*
