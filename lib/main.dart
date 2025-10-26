@@ -1,28 +1,21 @@
 
 import 'package:flutter/material.dart';
-import 'CustomButton.dart';
-import 'CustomMenu.dart';
-import 'SoundManager.dart';
-import 'CustomList.dart';
+
+import 'package:flame/game.dart';
+import 'package:flame/flame.dart';
+
+import 'GameDemo.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  Flame.device.fullScreen();
+  Flame.device.setLandscape();
+  
+  GameDemo game = GameDemo();
+  runApp(GameWidget game : game);
 }
 
-class MyApp extends StatelessWidget{
-  const MyApp({super.key});
-  
-  @override
-  Widget build(BuildContext context){
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text("My Game")
-        ),
-      )
-    );
-  }
-}
+
 
 /*
 

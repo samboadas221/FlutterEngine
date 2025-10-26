@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<map version="1.2" orientation="orthogonal" renderorder="right-down" width="16" height="32" tilewidth="16" tileheight="16" nextobjectid="1">
+  <properties>
+    <property name="sw1" value="8" />
+    <property name="sw2" value="7" />
+    <property name="sw3" value="29" />
+    <property name="sw5" value="31" />
+    <property name="sw6" value="30" />
+    <property name="sw4" value="4" />
+  </properties>
+  <tileset firstgid="1" name="Terrain (16x16)" columns="22" tilecount="242" tileheight="16" tilewidth="16">
+    <image source="Terrain (16x16).png" width="352" height="176" />
+  </tileset>
+  <layer name="Tile 1" width="16" height="32">
+    <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAA/5NgYGCQGCKYdRC4gRqYZYiaPZLwYEprHGiYVP2yQCwHxfI00E8ozdHafkLxh00/KfmEHu5nxxLPyJiTgH5kO7BheSrpR3cnqfrR1Q11/fjiihj9+OyipX4GKA0AmjQgEwAIAAA=
+  </data>
+  </layer>
+</map>

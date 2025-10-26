@@ -32,6 +32,8 @@ jobs:
 
       - name: APK Build
         run: |
+          flutter pub add flame
+          flutter pub add flame_tiled
           flutter pub run build_runner build --delete-conflicting-outputs || true
           flutter build apk --release
 
