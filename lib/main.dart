@@ -12,7 +12,7 @@ void main() {
   Flame.device.setLandscape();
   
   GameDemo game = GameDemo();
-  runApp(GameWidget game : game);
+  runApp(GameWidget game: game);
 }
 
 

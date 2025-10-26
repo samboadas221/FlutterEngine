@@ -5,7 +5,7 @@ import 'package:flame/game.dart';
 
 import 'levels/level.dart';
 
-class DemoGame extends FlameGame{
+class GameDemo extends FlameGame{
   
   @override 
   FutureOr<void> onLoad() async{
