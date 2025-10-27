@@ -1,9 +1,14 @@
 
 import 'dart:async';
+import 'dart:ui';
 import 'package:flame/game.dart';
+import 'package:flame/components.dart';
 import 'levels/level.dart';
 
 class GameDemo extends FlameGame{
+  
+  @override
+  Color backgroundColor() => const Color(0xFF211F30);
   
   late final CameraComponent camera;
   final world = Level();
@@ -11,7 +16,7 @@ class GameDemo extends FlameGame{
   @override 
   FutureOr<void> onLoad() async{
     camera = CameraComponent.withFixedResolution(world: world, width: 360, height: 600);
-    camera.viewFinder.anchor = Anchor.topLeft;
+    camera.viewfinder.anchor = Anchor.topLeft;
     addAll([ camera, world ]);
     return super.onLoad();
   }
