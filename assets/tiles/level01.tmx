@@ -9,7 +9,7 @@
     <property name="sw4" value="4" />
   </properties>
   <tileset firstgid="1" name="Terrain (16x16)" columns="22" tilecount="242" tileheight="16" tilewidth="16">
-    <image source="Terrain (16x16).png" width="352" height="176" />
+    <image source="../images/Terrain/Terrain (16x16).png" width="352" height="176" />
   </tileset>
   <layer name="Tile 1" width="16" height="32">
     <data encoding="base64" compression="gzip">
