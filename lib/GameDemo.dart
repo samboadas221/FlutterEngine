@@ -8,7 +8,8 @@ import 'levels/level.dart';
 class GameDemo extends FlameGame{
   
   @override
-  Color backgroundColor() => const Color(0xFF211F30);
+  // Color backgroundColor() => const Color(0xFF211F30);
+  Color backgroundColor() => const Color(0xFF00FF00); // verde brillante
   
   late final CameraComponent camera;
   final world = Level();
@@ -17,7 +18,7 @@ class GameDemo extends FlameGame{
   FutureOr<void> onLoad() async{
     camera = CameraComponent.withFixedResolution(world: world, width: 360, height: 600);
     camera.viewfinder.anchor = Anchor.topLeft;
-    addAll([ camera, world ]);
+    addAll([ world, camera ]);
     return super.onLoad();
   }
 }
