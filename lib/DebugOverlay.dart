@@ -10,7 +10,7 @@ class DebugOverlay extends Component {
   final List<TextComponent> _lines = [];
 
   DebugOverlay({
-    this.position = const Vector2(10, 10),
+    this.position = Vector2(10, 10),
     this.maxLines = 8,
     this.lineHeight = 18.0,
     int priority = 10000,
