@@ -10,11 +10,12 @@ class DebugOverlay extends Component {
   final List<TextComponent> _lines = [];
 
   DebugOverlay({
-    this.position = const Vector2(10, 10),
+    Vector2? position,
     this.maxLines = 8,
     this.lineHeight = 18.0,
     int priority = 10000,
-  }) : super(priority: priority);
+  }) : position = position ?? Vector2(10, 10),
+    super(priority: priority);
 
   /// Muestra un nuevo mensaje. Uso: debugOverlay.show('Mi msg');
   void show(String text) {
